@@ -1,0 +1,52 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: municipiosibge-postgres
+    environment:
+      POSTGRES_DB: municipios_ibge
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - municipiosibge_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d municipios_ibge"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  elasticache:
+    image: redis:7.4-alpine
+    container_name: municipiosibge-elasticache
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - municipiosibge_elasticache_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  municipiosibge:
+    image: municipiosibge
+    build:
+      context: .
+      dockerfile: MunicipiosIbge/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+      elasticache:
+        condition: service_healthy
+    environment:
+      ConnectionStrings__MunicipalitiesDatabase: Host=postgres;Port=5432;Database=municipios_ibge;Username=postgres;Password=postgres
+      ConnectionStrings__Cache: elasticache:6379
+      Database__ApplyMigrationsOnStartup: true
+      Ibge__BaseUrl: https://servicodados.ibge.gov.br/
+      Ibge__TimeoutSeconds: 60
+
+volumes:
+  municipiosibge_postgres_data:
+  municipiosibge_elasticache_data:

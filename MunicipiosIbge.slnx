@@ -1,0 +1,4 @@
+﻿<Solution>
+  <Project Path="src/MunicipiosIbge.Api/MunicipiosIbge.Api.csproj" />
+  <Project Path="src/MunicipiosIbge.Tests/MunicipiosIbge.Tests.csproj" />
+</Solution>

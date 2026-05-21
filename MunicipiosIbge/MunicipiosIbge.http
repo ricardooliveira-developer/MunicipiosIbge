@@ -1,0 +1,6 @@
+@MunicipiosIbge_HostAddress = http://localhost:5127
+
+GET {{MunicipiosIbge_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
